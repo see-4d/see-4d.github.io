@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="">
+  <meta name="keywords" content="4D Scene Generation, 4D Scene Reconstruction">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>See4D</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+
+  <link rel="icon" href="./static/images/see4d.png" type="image/x-icon">
+
+
+  <style>
+    .a {
+      color: rgb(166,82,166);
+    }
+    .columns {
+      display: flex; justify-content: flex-start; padding: 5px; text-align: left;
+    }
+    .tag {
+      background-color: #f5f5f5; border-radius: 3px; padding: 5px; margin-right: 5px; font-size: 14px; color: #333;
+    }
+    .mp4-demo {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      object-fit: cover;
+      background: #000;
+      margin-bottom: 2px; /* reduce bottom spacing */
+    }
+    figcaption {
+      font-size: 0.9em;
+      margin-top: 2px; /* reduce top spacing of caption */
+      color: #444;
+    }
+  </style>
+
+  <link rel="icon" href="./static/images/favicon.ico" type="image/x-icon">
+
+
+  <style>
+    #backToTopBtn {
+      position: fixed; bottom: 20px; right: 50px; z-index: 999;
+      background-color: rgb(166,82,166); color: white; border: none;
+      border-radius: 50%; padding: 12px 16px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0px 4px 8px rgba(0,0,0,0.2); transition: opacity 0.3s; display: none;
+    }
+    #backToTopBtn:hover {
+      background-color: rgb(229,157,35);
+    }
+    @media (max-width: 768px) {
+      #backToTopBtn {
+        font-size: 18px;
+        padding: 10px 14px;
+      }
+    }
+    .img-hover-effect {
+      transition: transform 0.3s ease-in-out;
+    }
+    .img-hover-effect:hover {
+      transform: scale(1.05);
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+
+    .iframe-container {
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      padding-top: 56.25%; /* 16:9 aspect ratio */
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .iframe-container .iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .click-and-move-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.85);
+      text-align: center;
+      z-index: 1;
+      font-size: 1.2em;
+      padding: 0.5rem;
+    }
+
+    .inline-image {
+      height: 1.2em;
+      vertical-align: middle;
+    }
+  </style>
+
+</head>
+
+
+<!-- Navbar -->
+<nav class="navbar is-light is-fixed-top" role="navigation" aria-label="main navigation" style="background-color: #f8f8f8; z-index: 998;">
+  <div class="container is-max-desktop">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://see-4d.github.io/">
+        &nbsp;&nbsp;<img src="./static/images/see4d.png" style="height: 37px; vertical-align: top" class="img-hover-effect">&nbsp;&nbsp;
+      </a>
+      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasic">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+    <div id="navbarBasic" class="navbar-menu">
+      <div class="navbar-start">
+        &nbsp;&nbsp;&nbsp;<a class="navbar-item" href="#overview"><i class="fa fa-eye"></i>&nbsp;Overview&nbsp;&nbsp;</a>
+        &nbsp;&nbsp;&nbsp;<a class="navbar-item" href="#4d-gen"><i class="fa fa-podcast"></i>&nbsp;4D Generation&nbsp;&nbsp;</a>
+        &nbsp;&nbsp;&nbsp;<a class="navbar-item" href="#4d-recon"><i class="fa fa-th-large"></i>&nbsp;4D Reconstruction&nbsp;&nbsp;</a>
+        &nbsp;&nbsp;&nbsp;<a class="navbar-item" href="#apply"><i class="fa fa-street-view"></i>&nbsp;Applications&nbsp;&nbsp;</a>
+        &nbsp;&nbsp;&nbsp;<a class="navbar-item" href="#benchmark"><i class="fa fa-table"></i>&nbsp;Benchmark&nbsp;&nbsp;</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+
+<body>
+
+  <button onclick="scrollToTop()" id="backToTopBtn" title="Go to top">↑</button>
+  <script>
+    window.onscroll = function() {
+      scrollFunction();
+    };
+    function scrollFunction() {
+      const button = document.getElementById("backToTopBtn");
+      if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        button.style.display = "block";
+      } else {
+        button.style.display = "none";
+      }
+    }
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+  
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">
+              <!-- <img src="./static/images/see4d.png" style="height: 48px; vertical-align: top" class="img-hover-effect"> <span style="color: rgb(67,89,216)">S</span><span style="color: rgb(95,90,222)">e</span><span style="color: rgb(124,91,228)">e</span><span style="color: rgb(151,92,234)">4</span><span style="color: rgb(180,93,240)">D</span> -->
+              </br>
+              <span style="color: rgb(67,89,216)">S</span><span style="color: rgb(95,90,222)">e</span><span style="color: rgb(124,91,228)">e</span><span style="color: rgb(151,92,234)">4</span><span style="color: rgb(180,93,240)">D</span>: Pose-Free 4D Generation via Auto-Regressive Video Inpainting
+            </h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="section" style="margin-top: -100px;"></section>
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class=" column is-full-width has-text-centered">
+      </br>
+      <img src="./static/images/teaser.png" />
+      <hr>
+    </div>
+  </div>
+  </div>
+  </section>
+
+
+
+
+  <section class="section" id="overview">
+    </br><div class="container is-max-desktop"><h2 class="title is-2 has-text-centered">TL;DR</h2>
+
+      <div class="content has-text-justified" style="padding-top: 10px">
+        <p class="has-text-centered">
+          <strong><span style="color: rgb(67,89,216)">S</span><span style="color: rgb(95,90,222)">e</span><span style="color: rgb(124,91,228)">e</span><span style="color: rgb(151,92,234)">4</span><span style="color: rgb(180,93,240)">D</span></strong>
+          enables high-quality 4D scene generation from a single unposed video by combining depth-guided lifting, spline-based virtual camera planning, and view-conditional diffusion in a temporally consistent, autoregressive framework.
+        </p>
+      </div>
+      
+      <div class="columns is-vcentered" style="margin-top: 20px;">
+        <div class="column is-half">
+          <h3 class="title is-3">No Pose? &nbsp;No Problem</h3>
+            <ul class="has-text-left" style="padding-left: 1.6em; list-style-type: disc;">
+              <li style="margin-bottom: 0.75em;">
+                Given an <strong>unposed</strong> source video, 
+                <strong><span style="color: rgb(67,89,216)">S</span><span style="color: rgb(95,90,222)">e</span><span style="color: rgb(124,91,228)">e</span><span style="color: rgb(151,92,234)">4</span><span style="color: rgb(180,93,240)">D</span></strong> 
+                spline-interpolates a trajectory of virtual camera poses and estimate per-frame depth to lift each frame into 3D. 
+              </li>
+              <li style="margin-bottom: 0.75em;">
+                Depth-guided forward warping produces <strong>intermediate latents</strong> which, together with source latents, are processed by our <strong>view-conditional diffusion</strong> model.
+              </li>
+              <li style="margin-bottom: 0.75em;">
+                The model is further augmented with <strong>spatiotemporal attention</strong> and <strong>noise-adaptive conditioning</strong> in an auto-regressive framework, enabling the synthesis of the desired target-view sequence.
+              </li>
+            </ul>
+        </div>
+
+        <div class="column is-half">
+          <div class="columns is-centered">
+            <div class="column has-text-centered">
+              <figure><figcaption style="margin-top: 2px;">Source Video</figcaption>
+                <video class="mp4-demo" src="./static/videos/teaser_source.mp4" autoplay loop muted playsinline controls></video>
+              </figure>
+            </div>
+            <div class="column has-text-centered">
+              <figure><figcaption style="margin-top: 2px;">Depth</figcaption>
+                <video class="mp4-demo" src="./static/videos/teaser_depth.mp4" autoplay loop muted playsinline controls></video>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="title is-3"><img src="./static/images/see4d.png" style="height: 32px; vertical-align: top" class="img-hover-effect"> Video-to-Video Generation</h3>
+
+      <div class="columns is-centered is-vcentered" style="margin-top: 10px;">
+        <div class="column has-text-centered" style="margin-top: -15px;">
+          <figure><figcaption>Warp Mask 1</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_y_-3_mask.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -15px;">
+          <figure><figcaption>Warp Mask 2</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_y_-6_mask.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -15px;">
+          <figure><figcaption>Warp Mask 3</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_y_-15_mask.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -15px;">
+          <figure><figcaption>Warp Mask 4</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_y_-20_mask.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -15px;">
+          <figure><figcaption>Warp Mask 5</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_y_-25_mask.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -15px;">
+          <figure><figcaption>Warp Mask 6</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_y_-30_mask.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+      </div>
+
+      <div class="columns is-centered is-vcentered" style="margin-top: 10px;">
+        <div class="column has-text-centered" style="margin-top: -35px; margin-bottom: -15px;">
+          <figure><figcaption>Gen View 1</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_y_-3_gen.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -35px; margin-bottom: -15px;">
+          <figure><figcaption>Gen View 2</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_y_-6_gen.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -35px; margin-bottom: -15px;">
+          <figure><figcaption>Gen View 3</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_y_-15_gen.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -35px; margin-bottom: -15px;">
+          <figure><figcaption>Gen View 4</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_y_-20_gen.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -35px; margin-bottom: -15px;">
+          <figure><figcaption>Gen View 5</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_y_-25_gen.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -35px; margin-bottom: -15px;">
+          <figure><figcaption>Gen View 6</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_y_-30_gen.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="columns is-centered is-vcentered" style="margin-top: 10px;">
+        <div class="column has-text-centered" style="margin-top: -15px;">
+          <figure><figcaption>Warp Mask 1</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_x_-2_mask.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -15px;">
+          <figure><figcaption>Warp Mask 2</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_x_-4_mask.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -15px;">
+          <figure><figcaption>Warp Mask 2</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_x_-5_mask.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -15px;">
+          <figure><figcaption>Warp Mask 3</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_x_-8_mask.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -15px;">
+          <figure><figcaption>Warp Mask 4</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_x_-12_mask.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -15px;">
+          <figure><figcaption>Warp Mask 5</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_x_-16_mask.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+      </div>
+
+      <div class="columns is-centered is-vcentered" style="margin-top: 10px;">
+        <div class="column has-text-centered" style="margin-top: -35px;">
+          <figure><figcaption>Gen View 1</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_x_-2_gen.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -35px;">
+          <figure><figcaption>Gen View 2</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_x_-4_gen.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -35px;">
+          <figure><figcaption>Gen View 3</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_x_-5_gen.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -35px;">
+          <figure><figcaption>Gen View 3</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_x_-8_gen.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -35px;">
+          <figure><figcaption>Gen View 4</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_x_-12_gen.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+        <div class="column has-text-centered" style="margin-top: -35px;">
+          <figure><figcaption>Gen View 5</figcaption>
+            <video class="mp4-demo lazy-video" src="./static/videos/teaser_arc_x_-16_gen.mp4" autoplay loop muted playsinline controls></video>
+          </figure>
+        </div>
+      </div>
+      <hr>
+  </section>
+
+
+
+
+
+
+
+
+  <!-- 4D Generation -->
+
+  <section class="section" id="4d-gen">
+    </br><div class="container is-max-desktop"><h2 class="title is-2 has-text-centered"><img src="./static/images/see4d.png" style="height: 44px; vertical-align: top" class="img-hover-effect"> 4D Generation</h2></div></br>
+
+    <div class="container is-max-desktop">
+      
+      <div class="box" style="margin-bottom: 50px;">
+        <!-- Row 1 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Source Video</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Warp Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot_arc_y_3.0000_warp.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Warp Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot_arc_y_7.0000_warp.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Warp Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot_arc_y_12.0000_warp.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+    
+        <!-- Row 2 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Depth</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot_depth.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot_arc_y_3.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot_arc_y_7.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot_arc_y_12.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="box" style="margin-bottom: 50px;">
+        <!-- Row 1 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Source Video</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot_woman.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Warp Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot_woman_arc_x_-5.0000_warp.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Warp Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot_woman_arc_x_-10.0000_warp.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Warp Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot_woman_arc_x_-15.0000_warp.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+    
+        <!-- Row 2 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Depth</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot_woman_depth.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot_woman_arc_x_-5.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot_woman_arc_x_-10.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_robot_woman_arc_x_-15.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="box" style="margin-bottom: 50px;">
+        <!-- Row 1 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Source Video</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_boat.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Warp Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_boat_arc_y_3.0000_warp.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Warp Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_boat_arc_y_7.0000_warp.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Warp Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_boat_arc_y_12.0000_warp.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+    
+        <!-- Row 2 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Depth</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_boat_depth.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_boat_arc_y_3.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_boat_arc_y_7.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_boat_arc_y_12.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="box" style="margin-bottom: 50px;">
+        <!-- Row 1 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Source Video</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_chimpanzee.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Warp Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_chimpanzee_arc_x_-5.0000_warp.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Warp Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_chimpanzee_arc_x_-10.0000_warp.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Warp Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_chimpanzee_arc_x_-15.0000_warp.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+    
+        <!-- Row 2 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Depth</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_chimpanzee_depth.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_chimpanzee_arc_x_-5.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_chimpanzee_arc_x_-10.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_chimpanzee_arc_x_-15.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="box" style="margin-bottom: 50px;">
+        <!-- Row 1 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Source Video</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_duck.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Warp Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_duck_arc_x_-5.0000_warp.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Warp Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_duck_arc_x_-10.0000_warp.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Warp Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_duck_arc_x_-15.0000_warp.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+    
+        <!-- Row 2 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Depth</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_duck_depth.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_duck_arc_x_-5.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_duck_arc_x_-10.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_duck_arc_x_-15.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+    <hr>
+    </div>
+
+    
+  </section>
+  
+  
+ 
+  
+
+
+
+
+
+  <!-- 4D Reconstruction -->
+
+  <section class="section" id="4d-recon">
+    <div class="container is-max-desktop">
+      </br><h2 class="title is-2 has-text-centered">
+        <img src="./static/images/see4d.png" style="height: 44px; vertical-align: top" class="img-hover-effect"> 4D Reconstruction
+      </h2>
+  
+      <div class="iframe-container">
+        <div class="click-and-move-overlay">
+          <h1 class="tldr">
+              <img src="static/images/icons/tap.png" alt="" class="inline-image">
+              Click & Drag
+          </h1>
+        </div>
+  
+        <iframe 
+          class="iframe"
+          src="https://see-4d.github.io/viser-client/?playbackPath=https://see-4d.github.io/recordings/teaser.viser&initialCameraPosition=-1.088,-1.280,-9.326&initialCameraLookAt=-3.995,2.390,1.505&initialCameraUp=-0.030,-0.997,0.077"
+          allowfullscreen
+          loading="lazy"
+        ></iframe>
+        <!-- <iframe 
+          class="iframe"
+          src="http://localhost:8000/viser-client/?playbackPath=http://localhost:8000/recordings/teaser.viser&initialCameraPosition=-1.088,-1.280,-9.326&initialCameraLookAt=-3.995,2.390,1.505&initialCameraUp=-0.030,-0.997,0.077"
+          allowfullscreen
+          loading="lazy"
+        ></iframe> -->
+      </div>
+      <hr>
+    </div>
+  </section>
+  
+
+
+
+
+
+
+
+  <!-- Applications -->
+
+  <section class="section" id="apply">
+    </br><div class="container is-max-desktop"><h2 class="title is-2 has-text-centered"><img src="./static/images/see4d.png" style="height: 44px; vertical-align: top" class="img-hover-effect"> Applications</h2></div></br></br>
+
+    <div class="container is-max-desktop">
+
+      <h2 class="title is-3 has-text-left" style="margin-bottom: 10px;">&nbsp;<img src="./static/images/icons/movie.png" style="height: 32px; vertical-align: top" class="img-hover-effect">&nbsp;Movie Clips</h2>
+      
+      <div class="box" style="margin-bottom: 30px;">
+        <!-- Row 1 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Source Video</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_sports_car.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_sports_car_arc_y_5.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_sports_car_arc_y_15.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+    
+        <!-- Row 2 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Depth</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_sports_car_depth.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_sports_car_arc_y_10.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure><figcaption style="margin-top: 4px;">Generated Video 4</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_sports_car_arc_y_25.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+      <div class="box" style="margin-bottom: 30px;">
+        <!-- Row 1 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered">
+            <figure>
+              <figcaption style="margin-top: 4px;">Source Video</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_joker.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_joker_arc_x_-5.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_joker_arc_x_-10.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+    
+        <!-- Row 2 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure>
+              <figcaption style="margin-top: 4px;">Depth</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_joker_depth_.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_joker_arc_y_-5.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 4</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_joker_arc_y_5.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+
+
+      <hr></br>
+
+
+
+      <h2 class="title is-3 has-text-left" style="margin-bottom: 10px;">&nbsp;<img src="./static/images/icons/robot-arm.png" style="height: 32px; vertical-align: top" class="img-hover-effect">&nbsp;Robot Grasping</h2>
+      
+      <div class="box" style="margin-bottom: 30px;">
+        <!-- Row 1 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered">
+            <figure>
+              <figcaption style="margin-top: 4px;">Source Video</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_grasp1.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_grasp1_tilt_x_5.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_grasp1_pan_y_5.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+    
+        <!-- Row 2 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure>
+              <figcaption style="margin-top: 4px;">Depth</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_grasp1_depth.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_grasp1_tilt_x_10.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 4</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_grasp1_pan_y_10.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+      <div class="box" style="margin-bottom: 30px;">
+        <!-- Row 1 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered">
+            <figure>
+              <figcaption style="margin-top: 4px;">Source Video</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_grasp2.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_grasp2_arc_x_-3.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_grasp2_arc_y_-3.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+    
+        <!-- Row 2 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure>
+              <figcaption style="margin-top: 4px;">Depth</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_grasp2_depth.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_grasp2_tilt_x_10.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 4</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_grasp2_tilt_x_15.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+
+
+      <hr></br>
+
+
+
+      <h2 class="title is-3 has-text-left" style="margin-bottom: 10px;">&nbsp;<img src="./static/images/icons/steering-wheel.png" style="height: 32px; vertical-align: top" class="img-hover-effect">&nbsp;Autonomous Driving</h2>
+      
+      <div class="box" style="margin-bottom: 30px;">
+        <!-- Row 1 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered">
+            <figure>
+              <figcaption style="margin-top: 4px;">Source Video</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_ad1.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_ad1_arc_x_-10.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_ad1_pan_y_10.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+    
+        <!-- Row 2 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure>
+              <figcaption style="margin-top: 4px;">Depth</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_ad1_depth.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_ad1_tilt_x_-15.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 4</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_ad1_pan_y_15.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+      <div class="box" style="margin-bottom: 30px;">
+        <!-- Row 1 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered">
+            <figure>
+              <figcaption style="margin-top: 4px;">Source Video</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_ad2.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 1</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_ad2_arc_y_5.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 3</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_ad2_arc_y_-20.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+    
+        <!-- Row 2 -->
+        <div class="columns is-centered is-vcentered">
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure>
+              <figcaption style="margin-top: 4px;">Depth</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_ad2_depth.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 2</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_ad2_arc_y_10.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+          <div class="column has-text-centered" style="margin-top: -20px;">
+            <figure>
+              <figcaption style="margin-top: 4px;">Generated Video 4</figcaption>
+              <video class="mp4-demo lazy-video" src="./static/videos/4dgen_ad2_arc_y_-25.0000_predict.mp4" autoplay loop muted playsinline controls></video>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+
+
+
+    </div>
+    
+  </section>
+
+
+
+
+
+
+
+
+    <!-- Benchmark -->
+
+    <section class="section" id="benchmark">
+    </br>
+    <div class="container is-max-desktop">
+      <h2 class="title is-2 has-text-centered"><img src="./static/images/see4d.png" style="height: 44px; vertical-align: top" class="img-hover-effect"> Benchmark</h2>
+    </div></br>
+  
+    <div class="container is-max-desktop has-text-centered">
+      <h3 class="title is-4">4D Reconstruction on iPhone Dataset</h3>
+    </div></br>
+
+    <!-- PSNR Table -->
+    <div class="container is-max-desktop">
+      <h4 class="subtitle is-5"><strong>Metric:</strong> PSNR (↑, the higher the better)</h4>
+      <table class="table is-bordered is-striped is-hoverable is-fullwidth">
+        <thead>
+          <tr>
+            <th>Method</th><th>Venue</th><th>Apple</th><th>Block</th><th>Paper</th><th>Spin</th><th>Teddy</th><th>Avg</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>GCD</td><td>ECCV'24</td><td>9.82</td><td>12.30</td><td>9.75</td><td>10.37</td><td>11.61</td><td>10.77</td></tr>
+          <tr><td>ViewCrafter</td><td>arXiv'24</td><td>10.19</td><td>10.28</td><td>10.63</td><td>11.15</td><td>11.50</td><td>10.75</td></tr>
+          <tr><td>Shape-of-Motion</td><td>arXiv'24</td><td>11.06</td><td>11.72</td><td>11.93</td><td>11.28</td><td>10.42</td><td>11.28</td></tr>
+          <tr><td>DaS</td><td>SIGGRAPH'25</td><td>10.02</td><td>11.64</td><td>10.27</td><td>11.11</td><td>11.82</td><td>10.97</td></tr>
+          <tr><td>ReCamMaster</td><td>arXiv'25</td><td>10.96</td><td>12.67</td><td>11.88</td><td>12.25</td><td>12.37</td><td>12.02</td></tr>
+          <tr><td>TrajectoryCrafter</td><td>arXiv'25</td><td>13.88</td><td>14.21</td><td>14.89</td><td>14.51</td><td>13.73</td><td>14.24</td></tr>
+          <tr><td><strong><span style="color: rgb(67,89,216)">S</span><span style="color: rgb(95,90,222)">e</span><span style="color: rgb(124,91,228)">e</span><span style="color: rgb(151,92,234)">4</span><span style="color: rgb(180,93,240)">D</span></strong></td><td><strong>Ours</strong></td><td><strong>13.98</strong></td><td><strong>14.67</strong></td><td><strong>15.24</strong></td><td><strong>14.72</strong></td><td><strong>14.22</strong></td><td><strong>14.56</strong></td></tr>
+        </tbody>
+      </table>
+    </div></br>
+
+    <!-- SSIM Table -->
+    <div class="container is-max-desktop">
+      <h4 class="subtitle is-5"><strong>Metric:</strong> SSIM (↑, the higher the better)</h4>
+      <table class="table is-bordered is-striped is-hoverable is-fullwidth">
+        <thead>
+          <tr>
+            <th>Method</th><th>Venue</th><th>Apple</th><th>Block</th><th>Paper</th><th>Spin</th><th>Teddy</th><th>Avg</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>GCD</td><td>ECCV'24</td><td>0.215</td><td>0.458</td><td>0.398</td><td>0.324</td><td>0.385</td><td>0.356</td></tr>
+          <tr><td>ViewCrafter</td><td>arXiv'24</td><td>0.245</td><td>0.427</td><td>0.344</td><td>0.308</td><td>0.372</td><td>0.339</td></tr>
+          <tr><td>Shape-of-Motion</td><td>arXiv'24</td><td>0.197</td><td>0.446</td><td>0.425</td><td>0.319</td><td>0.357</td><td>0.349</td></tr>
+          <tr><td>DaS</td><td>SIGGRAPH'25</td><td>0.217</td><td>0.388</td><td>0.356</td><td>0.312</td><td>0.381</td><td>0.331</td></tr>
+          <tr><td>ReCamMaster</td><td>arXiv'25</td><td>0.264</td><td>0.454</td><td>0.471</td><td>0.344</td><td>0.401</td><td>0.387</td></tr>
+          <tr><td>TrajectoryCrafter</td><td>arXiv'25</td><td>0.285</td><td>0.528</td><td>0.482</td><td>0.380</td><td>0.411</td><td>0.417</td></tr>
+          <tr><td><strong><span style="color: rgb(67,89,216)">S</span><span style="color: rgb(95,90,222)">e</span><span style="color: rgb(124,91,228)">e</span><span style="color: rgb(151,92,234)">4</span><span style="color: rgb(180,93,240)">D</span></strong></td><td><strong>Ours</strong></td><td><strong>0.309</strong></td><td><strong>0.555</strong></td><td><strong>0.514</strong></td><td><strong>0.399</strong></td><td><strong>0.434</strong></td><td><strong>0.442</strong></td></tr>
+        </tbody>
+      </table>
+    </div></br>
+
+    <!-- LPIPS Table -->
+    <div class="container is-max-desktop">
+      <h4 class="subtitle is-5"><strong>Metric:</strong> LPIPS (↓, the lower the better)</h4>
+      <table class="table is-bordered is-striped is-hoverable is-fullwidth">
+        <thead>
+          <tr>
+            <th>Method</th><th>Venue</th><th>Apple</th><th>Block</th><th>Paper</th><th>Spin</th><th>Teddy</th><th>Avg</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>GCD</td><td>ECCV'24</td><td>0.738</td><td>0.590</td><td>0.535</td><td>0.576</td><td>0.629</td><td>0.614</td></tr>
+          <tr><td>ViewCrafter</td><td>arXiv'24</td><td>0.750</td><td>0.615</td><td>0.521</td><td>0.533</td><td>0.606</td><td>0.605</td></tr>
+          <tr><td>Shape-of-Motion</td><td>arXiv'24</td><td>0.879</td><td>0.601</td><td>0.486</td><td>0.560</td><td>0.650</td><td>0.635</td></tr>
+          <tr><td>DaS</td><td>SIGGRAPH'25</td><td>0.732</td><td>0.593</td><td>0.520</td><td>0.551</td><td>0.608</td><td>0.601</td></tr>
+          <tr><td>ReCamMaster</td><td>arXiv'25</td><td>0.683</td><td>0.537</td><td>0.491</td><td>0.545</td><td>0.572</td><td>0.566</td></tr>
+          <tr><td>TrajectoryCrafter</td><td>arXiv'25</td><td>0.612</td><td>0.479</td><td>0.471</td><td>0.518</td><td>0.513</td><td>0.519</td></tr>
+          <tr><td><strong><span style="color: rgb(67,89,216)">S</span><span style="color: rgb(95,90,222)">e</span><span style="color: rgb(124,91,228)">e</span><span style="color: rgb(151,92,234)">4</span><span style="color: rgb(180,93,240)">D</span></strong></td><td><strong>Ours</strong></td><td><strong>0.581</strong></td><td><strong>0.455</strong></td><td><strong>0.439</strong></td><td><strong>0.501</strong></td><td><strong>0.486</strong></td><td><strong>0.492</strong></td></tr>
+        </tbody>
+      </table>
+    </div></br></br>
+
+  
+    <div class="container is-max-desktop has-text-centered">
+      <h3 class="title is-4">4D Generation on VBench</h3>
+    </div></br>
+
+    <div class="container is-max-desktop">
+      <table class="table is-bordered is-striped is-hoverable is-fullwidth">
+        <thead>
+          <tr>
+            <th rowspan="2">Method</th>
+            <th colspan="2">Frame Consistency</th>
+            <th colspan="2">Temporal Consistency</th>
+            <th colspan="2">Frame Quality</th>
+          </tr>
+          <tr>
+            <th>Subj. Consist</th>
+            <th>Back. Consist</th>
+            <th>Flick</th>
+            <th>Smooth</th>
+            <th>Image Quality</th>
+            <th>Aesthetic Quality</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>DaS</td>
+            <td>89.44</td>
+            <td>91.69</td>
+            <td>96.11</td>
+            <td>95.58</td>
+            <td>50.64</td>
+            <td>37.49</td>
+          </tr>
+          <tr>
+            <td>ReCamMaster</td>
+            <td>90.56</td>
+            <td>93.42</td>
+            <td>95.11</td>
+            <td><strong>98.12</strong></td>
+            <td>52.47</td>
+            <td>39.65</td>
+          </tr>
+          <tr>
+            <td>TrajectoryCrafter</td>
+            <td>89.61</td>
+            <td>92.55</td>
+            <td>92.78</td>
+            <td>93.49</td>
+            <td>52.20</td>
+            <td>37.62</td>
+          </tr>
+          <tr>
+            <td><strong><span style="color: rgb(67,89,216)">S</span><span style="color: rgb(95,90,222)">e</span><span style="color: rgb(124,91,228)">e</span><span style="color: rgb(151,92,234)">4</span><span style="color: rgb(180,93,240)">D</span></strong></td>
+            <td><strong>92.18</strong></td>
+            <td><strong>94.63</strong></td>
+            <td><strong>96.66</strong></td>
+            <td>97.87</td>
+            <td><strong>53.15</strong></td>
+            <td><strong>41.35</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div></br>
+    
+    </div>
+  
+    
+    </section>
+
+
+
+
+
+
+
+  <footer class="footer">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content">
+            <p>
+              This Website is under <a rel="license"
+                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+                Commons Attribution-ShareAlike 4.0 International</a> License.
+            </p>
+            <p>
+              Copyright © <span style="color: rgb(67,89,216)">S</span><span style="color: rgb(95,90,222)">e</span><span style="color: rgb(124,91,228)">e</span><span style="color: rgb(151,92,234)">4</span><span style="color: rgb(180,93,240)">D</span> 2025 All Rights Reserved.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+
+
+
+
+
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const lazyVideos = document.querySelectorAll("video.lazy-video");
+  
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver((entries, obs) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const video = entry.target;
+              const src = video.getAttribute("data-src");
+              if (src) {
+                video.src = src;
+                video.load();
+                video.classList.remove("lazy-video");
+                obs.unobserve(video);
+              }
+            }
+          });
+        });
+  
+        lazyVideos.forEach(video => observer.observe(video));
+      } else {
+        // Fallback: load all immediately if IntersectionObserver not supported
+        lazyVideos.forEach(video => {
+          const src = video.getAttribute("data-src");
+          if (src) {
+            video.src = src;
+            video.load();
+            video.classList.remove("lazy-video");
+          }
+        });
+      }
+    });
+  </script>
+  
+
+</body>
+
+</html>
